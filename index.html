@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Last Tap Wins - Timing Game</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="Tap at the perfect moment! Challenge your timing skills in this addictive mobile game.">
+<meta name="keywords" content="tap game, timing game, mobile game, casual game, reaction game">
+<meta property="og:title" content="Last Tap Wins">
+<meta property="og:description" content="Can you tap at the perfect moment? Challenge your timing skills!">
+<meta property="og:image" content="https://i.imgur.com/placeholder.jpg">
+<meta property="og:url" content="https://lasttapwins.netlify.app">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<!-- Monetag Ad Script -->
+<script src="https://sdk.monetag.com/ads.js"></script>
+<style>
+* { 
+    box-sizing: border-box; 
+    font-family: 'Arial', sans-serif; 
+    -webkit-tap-highlight-color: transparent;
+}
+body { 
+    margin: 0; 
+    padding: 0;
+    background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%); 
+    color: white; 
+    text-align: center;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+.container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    position: relative;
+}
+.header {
+    margin: 20px 0 30px;
+}
+h1 {
+    margin: 0;
+    font-size: 2.2em;
+    color: #00ff88;
+    text-shadow: 0 2px 10px rgba(0, 255, 136, 0.3);
+}
+.subtitle {
+    margin: 10px 0 20px;
+    opacity: 0.8;
+    font-size: 1.1em;
+}
+
+/* Game Bar */
+.game-bar-container {
+    position: relative;
+    height: 35px;
+    background: #2a2a4a;
+    border-radius: 17px;
+    overflow: hidden;
+    margin: 30px 0;
+    border: 2px solid #3a3a5a;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+}
+.target-zone {
+    position: absolute;
+    height: 100%;
+    background: linear-gradient(90deg, #00ff88, #00cc66);
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+}
+.indicator {
+    position: absolute;
+    height: 100%;
+    width: 8px;
+    background: #ff4444;
+    border-radius: 4px;
+    box-shadow: 0 0 10px rgba(255, 68, 68, 0.6);
+    z-index: 2;
+    transform: translateX(-50%);
+}
+
+/* Game Stats */
+.stats {
+    display: flex;
+    justify-content: space-between;
+    margin: 25px 0;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.stat-box {
+    flex: 1;
+}
+.stat-value {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #00ff88;
+    margin-bottom: 5px;
+}
+.stat-label {
+    font-size: 0.9em;
+    opacity: 0.7;
+}
+
+/* Buttons */
+.btn {
+    padding: 18px;
+    font-size: 1.2em;
+    width: 100%;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #00ff88, #00cc66);
+    color: #000;
+    margin: 15px 0;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s;
+    box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
+}
+.btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 255, 136, 0.4);
+}
+.btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Ad Banner */
+.ad-banner {
+    margin: 25px 0;
+    padding: 15px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1em;
+    font-weight: bold;
+    color: #00ff88;
+    cursor: pointer;
+    border: 1px solid rgba(0, 255, 136, 0.2);
+    transition: all 0.3s;
+}
+.ad-banner:hover {
+    background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.08));
+    border-color: rgba(0, 255, 136, 0.4);
+}
+.ad-banner-icon {
+    margin-right: 10px;
+    font-size: 1.2em;
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+.modal-content {
+    background: linear-gradient(135deg, #24243e, #302b63);
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    max-width: 350px;
+    width: 90%;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    animation: modalSlide 0.3s ease;
+}
+@keyframes modalSlide {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+.modal-title {
+    color: #ff4444;
+    margin-bottom: 20px;
+    font-size: 1.8em;
+}
+.modal-score {
+    font-size: 2.2em;
+    font-weight: bold;
+    color: #00ff88;
+    margin: 20px 0;
+    text-shadow: 0 2px 10px rgba(0, 255, 136, 0.3);
+}
+
+/* Ad Loading */
+.ad-loading {
+    text-align: center;
+    margin: 20px 0;
+    display: none;
+}
+.spinner {
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    border-top: 4px solid #00ff88;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 15px;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+.loading-text {
+    color: #00ff88;
+    margin-top: 10px;
+}
+
+/* Footer */
+.footer {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.9em;
+    opacity: 0.6;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .container {
+        padding: 15px;
+    }
+    h1 {
+        font-size: 1.8em;
+    }
+    .game-bar-container {
+        height: 30px;
+        margin: 25px 0;
+    }
+    .btn {
+        padding: 16px;
+        font-size: 1.1em;
+    }
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🎯 Last Tap Wins</h1>
+        <p class="subtitle">Tap at the PERFECT moment to score!</p>
+    </div>
+
+    <!-- Game Area -->
+    <div class="game-bar-container" id="bar">
+        <div class="target-zone" id="zone"></div>
+        <div class="indicator" id="indicator"></div>
+    </div>
+
+    <!-- Game Stats -->
+    <div class="stats">
+        <div class="stat-box">
+            <div class="stat-value" id="scoreText">0</div>
+            <div class="stat-label">SCORE</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-value" id="bestScoreText">0</div>
+            <div class="stat-label">BEST</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-value" id="streakText">0</div>
+            <div class="stat-label">STREAK</div>
+        </div>
+    </div>
+
+    <!-- Tap Button -->
+    <button class="btn" id="tapBtn">🎮 TAP NOW!</button>
+
+    <!-- Ad Banner -->
+    <div class="ad-banner" id="adBanner">
+        <span class="ad-banner-icon">⭐</span>
+        <span>Challenge Friends & Compete!</span>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>Last Tap Wins © 2024 | Timing Challenge Game</p>
+    </div>
+</div>
+
+<!-- Game Over Modal -->
+<div class="modal-overlay" id="gameOverModal">
+    <div class="modal-content">
+        <h2 class="modal-title">🎮 GAME OVER!</h2>
+        <div class="modal-score" id="modalScore">Score: 0</div>
+        
+        <!-- Ad Loading -->
+        <div class="ad-loading" id="adLoading">
+            <div class="spinner"></div>
+            <div class="loading-text">Loading ad...</div>
+        </div>
+
+        <!-- Continue with Ad Button -->
+        <button class="btn" id="watchAdBtn" style="background: linear-gradient(135deg, #ff4444, #cc0000); color: white;">
+            📺 Watch Ad to Continue
+        </button>
+        
+        <!-- Cancel Button (shown during ad load) -->
+        <button class="btn" id="cancelAdBtn" style="background: #666; color: white; display: none;">
+            Cancel
+        </button>
+
+        <!-- Play Again Button -->
+        <button class="btn" id="playAgainBtn">
+            🔄 Play Again
+        </button>
+    </div>
+</div>
+
+<script>
+// ===============================
+// CONFIGURATION - EDIT THIS SECTION
+// ===============================
+const CONFIG = {
+    MONETAG_PUBLISHER_ID: 'YOUR_MONETAG_PUBLISHER_ID', // Replace with your actual ID
+    GAME_NAME: 'Last Tap Wins',
+    VERSION: '1.0.0',
+    
+    // Game Settings
+    INITIAL_ZONE_WIDTH: 80,
+    MIN_ZONE_WIDTH: 25,
+    ZONE_DECREMENT: 1,
+    MIN_SPEED: 3,
+    MAX_SPEED: 4.5,
+    SPEED_STEP: 0.02,
+    
+    // Monetization
+    MAX_CONTINUES: 1, // How many times player can continue with ad
+};
+
+// ===============================
+// GAME STATE
+// ===============================
+let gameState = {
+    score: 0,
+    bestScore: 0,
+    streak: 0,
+    indicatorPos: 0,
+    speed: CONFIG.MIN_SPEED,
+    zoneStart: 100,
+    zoneWidth: CONFIG.INITIAL_ZONE_WIDTH,
+    running: false,
+    animationId: null,
+    speedIncreasing: true,
+    continuesUsed: 0,
+    canContinue: true
+};
+
+// ===============================
+// INITIALIZE MONETAG ADS
+// ===============================
+let monetagSDK = null;
+
+function initializeAds() {
+    if (typeof Monetag !== 'undefined') {
+        try {
+            monetagSDK = new Monetag({
+                publisherId: CONFIG.MONETAG_PUBLISHER_ID,
+                onInit: function() {
+                    console.log('✅ Monetag SDK initialized successfully');
+                },
+                onError: function(error) {
+                    console.warn('⚠️ Monetag SDK error:', error);
+                    showMessage("Ads temporarily unavailable. Playing without ads.");
+                }
+            });
+        } catch (error) {
+            console.error('❌ Failed to initialize Monetag:', error);
+        }
+    } else {
+        console.warn('⚠️ Monetag SDK not loaded');
+    }
+}
+
+// ===============================
+// DOM ELEMENTS
+// ===============================
+const elements = {
+    indicator: document.getElementById('indicator'),
+    zone: document.getElementById('zone'),
+    tapBtn: document.getElementById('tapBtn'),
+    scoreText: document.getElementById('scoreText'),
+    bestScoreText: document.getElementById('bestScoreText'),
+    streakText: document.getElementById('streakText'),
+    bar: document.getElementById('bar'),
+    gameOverModal: document.getElementById('gameOverModal'),
+    modalScore: document.getElementById('modalScore'),
+    watchAdBtn: document.getElementById('watchAdBtn'),
+    cancelAdBtn: document.getElementById('cancelAdBtn'),
+    playAgainBtn: document.getElementById('playAgainBtn'),
+    adBanner: document.getElementById('adBanner'),
+    adLoading: document.getElementById('adLoading')
+};
+
+// ===============================
+// GAME FUNCTIONS
+// ===============================
+function adjustBarWidth() {
+    return elements.bar.clientWidth - 4;
+}
+
+function saveBestScore() {
+    if (gameState.score > gameState.bestScore) {
+        gameState.bestScore = gameState.score;
+        localStorage.setItem('lastTapWins_bestScore', gameState.bestScore);
+        elements.bestScoreText.textContent = gameState.bestScore;
+    }
+}
+
+function loadBestScore() {
+    const saved = localStorage.getItem('lastTapWins_bestScore');
+    if (saved) {
+        gameState.bestScore = parseInt(saved) || 0;
+        elements.bestScoreText.textContent = gameState.bestScore;
+    }
+}
+
+function updateUI() {
+    elements.scoreText.textContent = gameState.score;
+    elements.streakText.textContent = gameState.streak;
+}
+
+function gameLoop() {
+    if (!gameState.running) return;
+
+    // Speed wave effect
+    if (gameState.speedIncreasing) {
+        gameState.speed += CONFIG.SPEED_STEP;
+        if (gameState.speed >= CONFIG.MAX_SPEED) gameState.speedIncreasing = false;
+    } else {
+        gameState.speed -= CONFIG.SPEED_STEP;
+        if (gameState.speed <= CONFIG.MIN_SPEED) gameState.speedIncreasing = true;
+    }
+
+    // Move indicator
+    const barWidth = adjustBarWidth();
+    gameState.indicatorPos += gameState.speed;
+    if (gameState.indicatorPos > barWidth) gameState.indicatorPos = 0;
+    elements.indicator.style.left = gameState.indicatorPos + 'px';
+
+    gameState.animationId = requestAnimationFrame(gameLoop);
+}
+
+function successTap() {
+    gameState.score++;
+    gameState.streak++;
+    
+    // Visual feedback
+    elements.zone.style.animation = 'none';
+    setTimeout(() => {
+        elements.zone.style.animation = 'pulse 0.3s';
+    }, 10);
+    
+    // Update zone
+    gameState.zoneWidth = Math.max(CONFIG.MIN_ZONE_WIDTH, gameState.zoneWidth - CONFIG.ZONE_DECREMENT);
+    const barWidth = adjustBarWidth();
+    gameState.zoneStart = Math.random() * (barWidth - gameState.zoneWidth);
+    
+    elements.zone.style.left = gameState.zoneStart + 'px';
+    elements.zone.style.width = gameState.zoneWidth + 'px';
+    
+    // Update UI and save score
+    updateUI();
+    saveBestScore();
+    
+    // Haptic feedback
+    if (navigator.vibrate) navigator.vibrate(30);
+    
+    // Reset for next round
+    resetRound();
+}
+
+function failTap() {
+    gameState.streak = 0;
+    
+    // Visual feedback
+    elements.bar.style.animation = 'shake 0.5s';
+    setTimeout(() => {
+        elements.bar.style.animation = '';
+    }, 500);
+    
+    // Haptic feedback
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+    
+    endGame();
+}
+
+function handleTap() {
+    if (!gameState.running) return;
+    
+    gameState.running = false;
+    cancelAnimationFrame(gameState.animationId);
+    
+    const barWidth = adjustBarWidth();
+    const inZone = gameState.indicatorPos >= gameState.zoneStart && 
+                   gameState.indicatorPos <= gameState.zoneStart + gameState.zoneWidth;
+    
+    if (inZone) {
+        successTap();
+    } else {
+        failTap();
+    }
+}
+
+function resetRound() {
+    gameState.running = true;
+    gameState.indicatorPos = 0;
+    elements.indicator.style.left = '0px';
+    cancelAnimationFrame(gameState.animationId);
+    gameLoop();
+}
+
+// ===============================
+// AD FUNCTIONS
+// ===============================
+function showRewardedAd() {
+    if (!monetagSDK) {
+        showMessage("Ad service not available. Please try again.");
+        hideAdLoading();
+        return;
+    }
+    
+    showAdLoading();
+    
+    try {
+        monetagSDK.showRewardedAd({
+            onAdLoaded: function() {
+                console.log('✅ Ad loaded');
+            },
+            onAdDisplayed: function() {
+                console.log('🎬 Ad displayed');
+            },
+            onReward: function(reward) {
+                console.log('💰 Reward granted:', reward);
+                hideAdLoading();
+                continueGame();
+            },
+            onAdClosed: function() {
+                console.log('❌ Ad closed');
+                hideAdLoading();
+                if (gameState.canContinue) {
+                    showCancelOption();
+                }
+            },
+            onError: function(error) {
+                console.error('⚠️ Ad error:', error);
+                hideAdLoading();
+                showMessage("Failed to load ad. Please try again.");
+                showCancelOption();
+            }
+        });
+    } catch (error) {
+        console.error('❌ Error showing ad:', error);
+        hideAdLoading();
+        showMessage("Error loading ad. Please try Play Again.");
+    }
+}
+
+function showAdLoading() {
+    elements.watchAdBtn.style.display = 'none';
+    elements.adLoading.style.display = 'block';
+    elements.cancelAdBtn.style.display = 'block';
+}
+
+function hideAdLoading() {
+    elements.watchAdBtn.style.display = 'block';
+    elements.adLoading.style.display = 'none';
+    elements.cancelAdBtn.style.display = 'none';
+}
+
+function showCancelOption() {
+    elements.watchAdBtn.style.display = 'block';
+    elements.cancelAdBtn.style.display = 'block';
+    elements.adLoading.style.display = 'none';
+}
+
+function continueGame() {
+    if (gameState.continuesUsed >= CONFIG.MAX_CONTINUES) {
+        gameState.canContinue = false;
+    }
+    gameState.continuesUsed++;
+    
+    hideGameOverModal();
+    elements.tapBtn.style.display = 'block';
+    resetRound();
+    
+    showMessage("🎉 Game continues! Good luck!");
+}
+
+// ===============================
+// UI FUNCTIONS
+// ===============================
+function showGameOverModal() {
+    elements.modalScore.textContent = `Score: ${gameState.score}\nBest: ${gameState.bestScore}`;
+    
+    // Show/hide continue button based on eligibility
+    if (gameState.canContinue && gameState.continuesUsed < CONFIG.MAX_CONTINUES) {
+        elements.watchAdBtn.style.display = 'block';
+        elements.watchAdBtn.disabled = false;
+    } else {
+        elements.watchAdBtn.style.display = 'none';
+    }
+    
+    hideAdLoading();
+    elements.cancelAdBtn.style.display = 'none';
+    elements.gameOverModal.style.display = 'flex';
+}
+
+function hideGameOverModal() {
+    elements.gameOverModal.style.display = 'none';
+}
+
+function endGame() {
+    elements.tapBtn.style.display = 'none';
+    gameState.running = false;
+    cancelAnimationFrame(gameState.animationId);
+    saveBestScore();
+    showGameOverModal();
+}
+
+function showMessage(text) {
+    if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.showAlert(text);
+    } else {
+        alert(text);
+    }
+}
+
+function resetGame() {
+    gameState.score = 0;
+    gameState.streak = 0;
+    gameState.speed = CONFIG.MIN_SPEED;
+    gameState.speedIncreasing = true;
+    gameState.zoneWidth = CONFIG.INITIAL_ZONE_WIDTH;
+    gameState.zoneStart = 100;
+    gameState.continuesUsed = 0;
+    gameState.canContinue = true;
+    
+    elements.zone.style.left = gameState.zoneStart + 'px';
+    elements.zone.style.width = gameState.zoneWidth + 'px';
+    elements.tapBtn.style.display = 'block';
+    
+    updateUI();
+    hideGameOverModal();
+    resetRound();
+}
+
+// ===============================
+// EVENT LISTENERS
+// ===============================
+elements.tapBtn.addEventListener('click', handleTap);
+elements.bar.addEventListener('click', handleTap);
+elements.bar.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    handleTap();
+});
+
+elements.watchAdBtn.addEventListener('click', showRewardedAd);
+elements.cancelAdBtn.addEventListener('click', hideAdLoading);
+elements.playAgainBtn.addEventListener('click', resetGame);
+
+elements.adBanner.addEventListener('click', function() {
+    const shareText = `I scored ${gameState.score} in Last Tap Wins! My best: ${gameState.bestScore} 🎯 Can you beat me?`;
+    const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(shareText)}`;
+    
+    if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.openTelegramLink(shareUrl);
+    } else {
+        window.open(shareUrl, '_blank');
+    }
+});
+
+// ===============================
+// INITIALIZATION
+// ===============================
+window.addEventListener('load', function() {
+    // Initialize game
+    loadBestScore();
+    updateUI();
+    
+    // Initialize ads
+    initializeAds();
+    
+    // Initialize Telegram Web App if available
+    if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.expand();
+        window.Telegram.WebApp.ready();
+    }
+    
+    // Start game
+    resetRound();
+    
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+    `;
+    document.head.appendChild(style);
+});
+
+// Handle window resize
+window.addEventListener('resize', function() {
+    if (gameState.running) {
+        const barWidth = adjustBarWidth();
+        elements.zone.style.left = gameState.zoneStart + 'px';
+        elements.zone.style.width = gameState.zoneWidth + 'px';
+        elements.indicator.style.left = gameState.indicatorPos + 'px';
+    }
+});
+</script>
+</body>
+</html>
