@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="description" content="Tap at the perfect moment! Challenge your timing skills in this addictive mobile game.">
 <meta name="keywords" content="tap game, timing game, mobile game, casual game, reaction game">
-<!-- Monetag Ad Script with fallback -->
+<!-- Monetag Ad Script -->
 <script src='//libtl.com/sdk.js' data-zone='10321103' data-sdk='show_10321103' async></script>
 <style>
 * { 
@@ -309,9 +309,7 @@ h1 {
 </div>
 
 <script>
-// ====================== SAFE GAME CODE - NO ERRORS ======================
-
-// Game State - Simple and reliable
+// ====================== GAME STATE ======================
 let gameState = {
     score: 0,
     bestScore: 0,
@@ -324,10 +322,10 @@ let gameState = {
     animationId: null,
     speedIncreasing: true,
     canContinue: true,
-    adAvailable: true
+    isShowingAd: false
 };
 
-// DOM Elements
+// ====================== DOM ELEMENTS ======================
 const elements = {
     indicator: document.getElementById('indicator'),
     zone: document.getElementById('zone'),
@@ -351,26 +349,18 @@ function adjustBarWidth() {
 }
 
 function saveBestScore() {
-    try {
-        if (gameState.score > gameState.bestScore) {
-            gameState.bestScore = gameState.score;
-            localStorage.setItem('lastTapWins_bestScore', gameState.bestScore);
-            elements.bestScoreText.textContent = gameState.bestScore;
-        }
-    } catch (e) {
-        console.log("Could not save score");
+    if (gameState.score > gameState.bestScore) {
+        gameState.bestScore = gameState.score;
+        localStorage.setItem('lastTapWins_bestScore', gameState.bestScore);
+        elements.bestScoreText.textContent = gameState.bestScore;
     }
 }
 
 function loadBestScore() {
-    try {
-        const saved = localStorage.getItem('lastTapWins_bestScore');
-        if (saved) {
-            gameState.bestScore = parseInt(saved) || 0;
-            elements.bestScoreText.textContent = gameState.bestScore;
-        }
-    } catch (e) {
-        console.log("Could not load saved score");
+    const saved = localStorage.getItem('lastTapWins_bestScore');
+    if (saved) {
+        gameState.bestScore = parseInt(saved) || 0;
+        elements.bestScoreText.textContent = gameState.bestScore;
     }
 }
 
@@ -382,7 +372,6 @@ function updateUI() {
 function gameLoop() {
     if (!gameState.running) return;
 
-    // Speed wave effect
     if (gameState.speedIncreasing) {
         gameState.speed += 0.02;
         if (gameState.speed >= 4.5) gameState.speedIncreasing = false;
@@ -391,7 +380,6 @@ function gameLoop() {
         if (gameState.speed <= 3) gameState.speedIncreasing = true;
     }
 
-    // Move indicator
     const barWidth = adjustBarWidth();
     gameState.indicatorPos += gameState.speed;
     if (gameState.indicatorPos > barWidth) gameState.indicatorPos = 0;
@@ -404,13 +392,11 @@ function successTap() {
     gameState.score++;
     gameState.streak++;
     
-    // Visual feedback
     elements.zone.style.animation = 'none';
     setTimeout(() => {
         elements.zone.style.animation = 'pulse 0.3s';
     }, 10);
     
-    // Update zone
     gameState.zoneWidth = Math.max(25, gameState.zoneWidth - 1);
     const barWidth = adjustBarWidth();
     gameState.zoneStart = Math.random() * (barWidth - gameState.zoneWidth);
@@ -418,40 +404,23 @@ function successTap() {
     elements.zone.style.left = gameState.zoneStart + 'px';
     elements.zone.style.width = gameState.zoneWidth + 'px';
     
-    // Update UI and save score
     updateUI();
     saveBestScore();
     
-    // Haptic feedback (safe)
-    if (navigator.vibrate) {
-        try {
-            navigator.vibrate(30);
-        } catch (e) {
-            // Ignore vibration errors
-        }
-    }
+    if (navigator.vibrate) navigator.vibrate(30);
     
-    // Reset for next round
     resetRound();
 }
 
 function failTap() {
     gameState.streak = 0;
     
-    // Visual feedback
     elements.bar.style.animation = 'shake 0.5s';
     setTimeout(() => {
         elements.bar.style.animation = '';
     }, 500);
     
-    // Haptic feedback (safe)
-    if (navigator.vibrate) {
-        try {
-            navigator.vibrate([100, 50, 100]);
-        } catch (e) {
-            // Ignore vibration errors
-        }
-    }
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
     
     endGame();
 }
@@ -485,7 +454,7 @@ function resetRound() {
     gameLoop();
 }
 
-// ====================== AD FUNCTIONS (SAFE) ======================
+// ====================== MONETAG REWARDED INTERSTITIAL ======================
 function showAdLoading() {
     elements.watchAdBtn.style.display = 'none';
     elements.adLoading.style.display = 'block';
@@ -499,41 +468,74 @@ function hideAdLoading() {
 }
 
 function showRewardedAd() {
-    // Show loading state
+    if (gameState.isShowingAd) return;
+    
+    gameState.isShowingAd = true;
     showAdLoading();
     
-    // Try to show Monetag ad
-    try {
-        // Check if Monetag is available
-        if (typeof window.MonetagSDK !== 'undefined' && window.MonetagSDK.showAd) {
-            window.MonetagSDK.showAd();
-            
-            // Set timeout to hide loading if ad doesn't show
-            setTimeout(function() {
-                if (elements.adLoading.style.display === 'block') {
-                    hideAdLoading();
-                    showMessage("Ad timed out. Please try again.");
-                }
-            }, 10000); // 10 second timeout
-        } else {
-            // Fallback if Monetag not loaded
-            setTimeout(function() {
+    // Check if Monetag function exists
+    if (typeof show_10321103 === 'function') {
+        console.log('🎬 Showing Monetag rewarded interstitial...');
+        
+        // Set timeout in case ad fails to show
+        const timeoutId = setTimeout(() => {
+            if (gameState.isShowingAd) {
+                console.warn('⚠️ Ad timeout after 10 seconds');
                 hideAdLoading();
-                simulateAdReward();
-            }, 2000);
+                gameState.isShowingAd = false;
+                showMessage("Ad failed to load. Please try again.");
+            }
+        }, 10000);
+        
+        try {
+            // Call Monetag rewarded interstitial function
+            show_10321103().then(() => {
+                // This runs AFTER user watches the ad
+                console.log('✅ Ad watched successfully!');
+                clearTimeout(timeoutId);
+                hideAdLoading();
+                gameState.isShowingAd = false;
+                
+                // Give reward to player
+                continueGame();
+                
+                // Optional: Show success message
+                showMessage("🎉 Ad watched! Game continues!");
+            }).catch(error => {
+                // This runs if ad fails
+                console.error('❌ Ad error:', error);
+                clearTimeout(timeoutId);
+                hideAdLoading();
+                gameState.isShowingAd = false;
+                showMessage("Ad failed. Please try again.");
+            });
+            
+        } catch (error) {
+            console.error('❌ Error showing ad:', error);
+            clearTimeout(timeoutId);
+            hideAdLoading();
+            gameState.isShowingAd = false;
+            showMessage("Error showing ad. Please try again.");
         }
-    } catch (error) {
-        // If anything goes wrong, use fallback
-        console.log("Ad error, using fallback");
-        hideAdLoading();
-        simulateAdReward();
+    } else {
+        // Fallback if Monetag not loaded
+        console.log('⚠️ Monetag not loaded, using fallback');
+        setTimeout(() => {
+            hideAdLoading();
+            gameState.isShowingAd = false;
+            simulateAdReward();
+        }, 2000);
     }
 }
 
 function simulateAdReward() {
-    // Fallback if ads don't work - player gets reward anyway
-    continueGame();
-    showMessage("Ad watched! Game continues! 🎉");
+    // Fallback simulation (5 second ad)
+    showMessage("🎬 Playing ad simulation... (5 seconds)");
+    
+    setTimeout(() => {
+        continueGame();
+        showMessage("✅ Ad completed! Game continues! 🎉");
+    }, 5000);
 }
 
 function continueGame() {
@@ -547,8 +549,7 @@ function continueGame() {
 function showGameOverModal() {
     elements.modalScore.textContent = `Score: ${gameState.score}\nBest: ${gameState.bestScore}`;
     
-    // Show/hide continue button
-    if (gameState.canContinue && gameState.adAvailable) {
+    if (gameState.canContinue) {
         elements.watchAdBtn.style.display = 'block';
         elements.watchAdBtn.disabled = false;
         elements.watchAdBtn.textContent = '📺 Watch Ad to Continue';
@@ -576,10 +577,7 @@ function endGame() {
 }
 
 function showMessage(text) {
-    // Simple alert that won't break
-    setTimeout(function() {
-        alert(text);
-    }, 100);
+    alert(text);
 }
 
 function resetGame() {
@@ -590,7 +588,7 @@ function resetGame() {
     gameState.zoneWidth = 80;
     gameState.zoneStart = 100;
     gameState.canContinue = true;
-    gameState.adAvailable = true;
+    gameState.isShowingAd = false;
     
     elements.zone.style.left = gameState.zoneStart + 'px';
     elements.zone.style.width = gameState.zoneWidth + 'px';
@@ -605,17 +603,14 @@ function resetGame() {
 elements.tapBtn.addEventListener('click', handleTap);
 elements.bar.addEventListener('click', handleTap);
 elements.bar.addEventListener('touchstart', function(e) {
-    try {
-        e.preventDefault();
-    } catch (e) {
-        // Ignore preventDefault errors
-    }
+    e.preventDefault();
     handleTap();
 });
 
 elements.watchAdBtn.addEventListener('click', showRewardedAd);
 elements.cancelAdBtn.addEventListener('click', function() {
     hideAdLoading();
+    gameState.isShowingAd = false;
     elements.watchAdBtn.style.display = 'block';
     elements.cancelAdBtn.style.display = 'none';
 });
@@ -649,25 +644,21 @@ window.addEventListener('load', function() {
     `;
     document.head.appendChild(style);
     
-    // Simple Monetag listener (won't break if not available)
-    try {
-        window.addEventListener('monetag_ad_closed', function() {
-            hideAdLoading();
-        });
-        
-        window.addEventListener('monetag_ad_reward', function() {
-            continueGame();
-        });
-    } catch (e) {
-        // Monetag events not available - that's OK
-        console.log("Monetag events not available, using fallback");
-    }
+    // Check if Monetag loaded
+    setTimeout(() => {
+        if (typeof show_10321103 !== 'function') {
+            console.warn('⚠️ Monetag show_10321103 function not found');
+            elements.watchAdBtn.textContent = 'Continue (Free)';
+        } else {
+            console.log('✅ Monetag loaded successfully');
+        }
+    }, 3000);
     
     // Start the game
     setTimeout(resetRound, 500);
 });
 
-// Handle window resize safely
+// Handle window resize
 window.addEventListener('resize', function() {
     if (gameState.running) {
         const barWidth = adjustBarWidth();
@@ -677,14 +668,18 @@ window.addEventListener('resize', function() {
     }
 });
 
-// Safety check for Monetag loading
-setTimeout(function() {
-    if (typeof window.MonetagSDK === 'undefined') {
-        console.log("Monetag not loaded after 3 seconds, using fallback ads");
-        gameState.adAvailable = false;
-        elements.watchAdBtn.textContent = "Continue (Free)";
-    }
-}, 3000);
+// Monitor Monetag SDK loading
+window.addEventListener('monetag_ad_loaded', function() {
+    console.log('✅ Monetag ad loaded event received');
+});
+
+window.addEventListener('monetag_ad_error', function(e) {
+    console.warn('⚠️ Monetag ad error:', e.detail);
+});
+
+window.addEventListener('monetag_ad_closed', function() {
+    console.log('🔒 Monetag ad closed event received');
+});
 </script>
 </body>
 </html>
