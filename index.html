@@ -11,7 +11,7 @@
 <style>
 * { 
     box-sizing: border-box; 
-    font-family: 'Arial', sans-serif; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
     -webkit-tap-highlight-color: transparent;
 }
 body { 
@@ -22,78 +22,123 @@ body {
     text-align: center;
     min-height: 100vh;
     overflow-x: hidden;
+    position: relative;
+}
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 30%, rgba(0, 255, 136, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(255, 68, 68, 0.1) 0%, transparent 40%);
+    z-index: -1;
 }
 .container {
-    max-width: 400px;
+    max-width: 500px;
     margin: 0 auto;
     padding: 20px;
     position: relative;
 }
 .header {
     margin: 20px 0 30px;
+    position: relative;
 }
 h1 {
     margin: 0;
-    font-size: 2.2em;
-    color: #00ff88;
+    font-size: 2.5em;
+    background: linear-gradient(135deg, #00ff88, #00cc66);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
     text-shadow: 0 2px 10px rgba(0, 255, 136, 0.3);
+    letter-spacing: 1px;
+    font-weight: 800;
 }
 .subtitle {
     margin: 10px 0 20px;
     opacity: 0.8;
     font-size: 1.1em;
+    font-weight: 300;
+}
+
+.game-area {
+    position: relative;
+    padding: 25px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    margin: 20px 0;
 }
 
 .game-bar-container {
     position: relative;
-    height: 35px;
-    background: #2a2a4a;
-    border-radius: 17px;
+    height: 40px;
+    background: rgba(42, 42, 74, 0.8);
+    border-radius: 20px;
     overflow: hidden;
     margin: 30px 0;
-    border: 2px solid #3a3a5a;
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 
+        inset 0 0 15px rgba(0, 0, 0, 0.5),
+        0 5px 15px rgba(0, 0, 0, 0.2);
 }
 .target-zone {
     position: absolute;
     height: 100%;
     background: linear-gradient(90deg, #00ff88, #00cc66);
-    border-radius: 15px;
+    border-radius: 18px;
     transition: all 0.3s ease;
-    box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+    z-index: 1;
 }
 .indicator {
     position: absolute;
-    height: 100%;
-    width: 8px;
+    height: 110%;
+    width: 12px;
     background: #ff4444;
-    border-radius: 4px;
-    box-shadow: 0 0 10px rgba(255, 68, 68, 0.6);
+    border-radius: 6px;
+    box-shadow: 
+        0 0 15px rgba(255, 68, 68, 0.8),
+        0 0 30px rgba(255, 68, 68, 0.4);
     z-index: 2;
     transform: translateX(-50%);
+    top: -5%;
 }
 
 .stats {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
     margin: 25px 0;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 15px;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 .stat-box {
-    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 20px 15px;
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+.stat-box:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
 }
 .stat-value {
-    font-size: 1.8em;
-    font-weight: bold;
+    font-size: 2em;
+    font-weight: 800;
     color: #00ff88;
     margin-bottom: 5px;
+    text-shadow: 0 2px 5px rgba(0, 255, 136, 0.3);
 }
 .stat-label {
     font-size: 0.9em;
     opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .btn {
@@ -101,18 +146,34 @@ h1 {
     font-size: 1.2em;
     width: 100%;
     border: none;
-    border-radius: 12px;
+    border-radius: 15px;
     background: linear-gradient(135deg, #00ff88, #00cc66);
     color: #000;
     margin: 15px 0;
     cursor: pointer;
-    font-weight: bold;
-    transition: all 0.2s;
-    box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
+    font-weight: 700;
+    transition: all 0.3s;
+    box-shadow: 0 5px 20px rgba(0, 255, 136, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+.btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(rgba(255, 255, 255, 0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+.btn:hover:not(:disabled)::after {
+    opacity: 1;
 }
 .btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 255, 136, 0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 255, 136, 0.4);
 }
 .btn:active:not(:disabled) {
     transform: translateY(0);
@@ -131,12 +192,16 @@ h1 {
     color: white;
     margin-bottom: 10px;
 }
+.btn-secondary {
+    background: linear-gradient(135deg, #3a3a5a, #2a2a4a);
+    color: white;
+}
 
 .ad-banner {
     margin: 25px 0;
-    padding: 15px;
+    padding: 18px;
     background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-    border-radius: 12px;
+    border-radius: 15px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -146,14 +211,17 @@ h1 {
     cursor: pointer;
     border: 1px solid rgba(0, 255, 136, 0.2);
     transition: all 0.3s;
+    text-align: center;
 }
 .ad-banner:hover {
     background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.08));
     border-color: rgba(0, 255, 136, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 255, 136, 0.2);
 }
 .ad-banner-icon {
     margin-right: 10px;
-    font-size: 1.2em;
+    font-size: 1.4em;
 }
 
 .modal-overlay {
@@ -162,34 +230,50 @@ h1 {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.85);
+    background: rgba(0, 0, 0, 0.9);
     display: none;
     justify-content: center;
     align-items: center;
     z-index: 1000;
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(10px);
 }
 .modal-content {
     background: linear-gradient(135deg, #24243e, #302b63);
-    padding: 30px;
-    border-radius: 20px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-    max-width: 350px;
+    padding: 40px 30px;
+    border-radius: 25px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+    max-width: 400px;
     width: 90%;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    animation: modalSlide 0.3s ease;
+    animation: modalSlide 0.4s ease;
+    position: relative;
+}
+.modal-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, #00ff88, #ff4444);
+    border-radius: 25px 25px 0 0;
 }
 @keyframes modalSlide {
     from { transform: translateY(-50px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
 }
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
 .modal-title {
     color: #ff4444;
     margin-bottom: 20px;
-    font-size: 1.8em;
+    font-size: 2em;
+    font-weight: 800;
 }
 .modal-score {
-    font-size: 2.2em;
+    font-size: 2.5em;
     font-weight: bold;
     color: #00ff88;
     margin: 20px 0;
@@ -200,13 +284,14 @@ h1 {
     text-align: center;
     margin: 20px 0;
     display: none;
+    animation: fadeIn 0.5s ease;
 }
 .spinner {
     border: 4px solid rgba(255, 255, 255, 0.1);
     border-radius: 50%;
     border-top: 4px solid #00ff88;
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
     animation: spin 1s linear infinite;
     margin: 0 auto 15px;
 }
@@ -217,6 +302,7 @@ h1 {
 .loading-text {
     color: #00ff88;
     margin-top: 10px;
+    font-size: 1.1em;
 }
 
 .footer {
@@ -227,34 +313,182 @@ h1 {
     opacity: 0.6;
 }
 
+.pulse {
+    animation: pulse 0.5s ease-in-out;
+}
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.shake {
+    animation: shake 0.5s ease-in-out;
+}
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.success {
+    animation: success 0.5s ease;
+}
+@keyframes success {
+    0% { box-shadow: 0 0 20px rgba(0, 255, 136, 0.4); }
+    50% { box-shadow: 0 0 40px rgba(0, 255, 136, 0.8); }
+    100% { box-shadow: 0 0 20px rgba(0, 255, 136, 0.4); }
+}
+
+.difficulty-indicator {
+    margin: 15px 0;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+.tutorial-text {
+    background: rgba(0, 255, 136, 0.1);
+    padding: 12px;
+    border-radius: 10px;
+    margin: 20px 0;
+    font-size: 0.95em;
+    border-left: 4px solid #00ff88;
+    text-align: left;
+}
+
+.start-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    animation: fadeIn 0.5s ease;
+}
+.start-content {
+    max-width: 400px;
+    width: 90%;
+    padding: 40px 30px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 25px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
+.start-title {
+    font-size: 2.8em;
+    background: linear-gradient(135deg, #00ff88, #00cc66);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 10px;
+    font-weight: 800;
+}
+.start-subtitle {
+    font-size: 1.2em;
+    opacity: 0.8;
+    margin-bottom: 30px;
+    font-weight: 300;
+}
+.start-instructions {
+    background: rgba(0, 255, 136, 0.1);
+    padding: 20px;
+    border-radius: 15px;
+    margin: 25px 0;
+    text-align: left;
+    border-left: 4px solid #00ff88;
+}
+.start-instructions h3 {
+    margin-top: 0;
+    color: #00ff88;
+}
+.start-instructions ol {
+    padding-left: 20px;
+}
+.start-instructions li {
+    margin-bottom: 10px;
+}
+.high-score-display {
+    font-size: 1.3em;
+    margin: 20px 0;
+    color: #00ff88;
+    font-weight: bold;
+}
+
 @media (max-width: 480px) {
     .container {
         padding: 15px;
     }
     h1 {
-        font-size: 1.8em;
+        font-size: 2em;
     }
     .game-bar-container {
-        height: 30px;
+        height: 35px;
         margin: 25px 0;
     }
     .btn {
         padding: 16px;
         font-size: 1.1em;
     }
+    .stat-value {
+        font-size: 1.7em;
+    }
+    .start-title {
+        font-size: 2.2em;
+    }
 }
 </style>
 </head>
 <body>
-<div class="container">
+<!-- Start Screen -->
+<div class="start-screen" id="startScreen">
+    <div class="start-content">
+        <h1 class="start-title">🎯 Last Tap Wins</h1>
+        <p class="start-subtitle">Master the perfect timing!</p>
+        
+        <div class="start-instructions">
+            <h3>How to Play:</h3>
+            <ol>
+                <li>Tap when the red indicator is inside the green zone</li>
+                <li>Each successful tap increases your score</li>
+                <li>The green zone gets smaller as you progress</li>
+                <li>Miss the zone and the game ends!</li>
+            </ol>
+        </div>
+        
+        <div class="high-score-display" id="highScoreDisplay">
+            Your Best: <span id="startBestScore">0</span>
+        </div>
+        
+        <button class="btn" id="startGameBtn">🚀 Start Game</button>
+        <button class="btn btn-secondary" id="howToPlayBtn">📖 How to Play</button>
+    </div>
+</div>
+
+<div class="container" id="gameContainer" style="display: none;">
     <div class="header">
         <h1>🎯 Last Tap Wins</h1>
         <p class="subtitle">Tap at the PERFECT moment to score!</p>
     </div>
 
-    <div class="game-bar-container" id="bar">
-        <div class="target-zone" id="zone"></div>
-        <div class="indicator" id="indicator"></div>
+    <div class="game-area">
+        <div class="difficulty-indicator">
+            Difficulty: <span id="difficultyText">Normal</span>
+        </div>
+        
+        <div class="game-bar-container" id="bar">
+            <div class="target-zone" id="zone"></div>
+            <div class="indicator" id="indicator"></div>
+        </div>
+        
+        <div class="tutorial-text" id="tutorialText">
+            <strong>Tip:</strong> Watch the indicator's speed pattern - it speeds up and slows down rhythmically.
+        </div>
     </div>
 
     <div class="stats">
@@ -273,6 +507,7 @@ h1 {
     </div>
 
     <button class="btn" id="tapBtn">🎮 TAP NOW!</button>
+    <button class="btn btn-secondary" id="pauseBtn">⏸️ Pause</button>
 
     <div class="ad-banner" id="adBanner">
         <span class="ad-banner-icon">⭐</span>
@@ -305,6 +540,32 @@ h1 {
         <button class="btn" id="playAgainBtn">
             🔄 Play Again
         </button>
+        
+        <button class="btn btn-secondary" id="mainMenuBtn">
+            🏠 Main Menu
+        </button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="pauseModal">
+    <div class="modal-content">
+        <h2 class="modal-title">⏸️ GAME PAUSED</h2>
+        
+        <div class="modal-score">
+            Score: <span id="pauseScore">0</span>
+        </div>
+        
+        <button class="btn" id="resumeBtn">
+            ▶️ Resume Game
+        </button>
+        
+        <button class="btn btn-secondary" id="restartBtn">
+            🔄 Restart Game
+        </button>
+        
+        <button class="btn btn-secondary" id="quitBtn">
+            🏠 Quit to Menu
+        </button>
     </div>
 </div>
 
@@ -322,7 +583,8 @@ let gameState = {
     animationId: null,
     speedIncreasing: true,
     canContinue: true,
-    isShowingAd: false
+    isShowingAd: false,
+    isPaused: false
 };
 
 // ====================== DOM ELEMENTS ======================
@@ -340,7 +602,21 @@ const elements = {
     cancelAdBtn: document.getElementById('cancelAdBtn'),
     playAgainBtn: document.getElementById('playAgainBtn'),
     adBanner: document.getElementById('adBanner'),
-    adLoading: document.getElementById('adLoading')
+    adLoading: document.getElementById('adLoading'),
+    startScreen: document.getElementById('startScreen'),
+    gameContainer: document.getElementById('gameContainer'),
+    startGameBtn: document.getElementById('startGameBtn'),
+    howToPlayBtn: document.getElementById('howToPlayBtn'),
+    pauseBtn: document.getElementById('pauseBtn'),
+    pauseModal: document.getElementById('pauseModal'),
+    resumeBtn: document.getElementById('resumeBtn'),
+    restartBtn: document.getElementById('restartBtn'),
+    quitBtn: document.getElementById('quitBtn'),
+    mainMenuBtn: document.getElementById('mainMenuBtn'),
+    difficultyText: document.getElementById('difficultyText'),
+    startBestScore: document.getElementById('startBestScore'),
+    pauseScore: document.getElementById('pauseScore'),
+    tutorialText: document.getElementById('tutorialText')
 };
 
 // ====================== GAME FUNCTIONS ======================
@@ -353,6 +629,7 @@ function saveBestScore() {
         gameState.bestScore = gameState.score;
         localStorage.setItem('lastTapWins_bestScore', gameState.bestScore);
         elements.bestScoreText.textContent = gameState.bestScore;
+        elements.startBestScore.textContent = gameState.bestScore;
     }
 }
 
@@ -361,16 +638,32 @@ function loadBestScore() {
     if (saved) {
         gameState.bestScore = parseInt(saved) || 0;
         elements.bestScoreText.textContent = gameState.bestScore;
+        elements.startBestScore.textContent = gameState.bestScore;
     }
 }
 
 function updateUI() {
     elements.scoreText.textContent = gameState.score;
     elements.streakText.textContent = gameState.streak;
+    
+    // Update difficulty text based on zone width
+    if (gameState.zoneWidth <= 30) {
+        elements.difficultyText.textContent = "Extreme";
+        elements.difficultyText.style.color = "#ff4444";
+    } else if (gameState.zoneWidth <= 50) {
+        elements.difficultyText.textContent = "Hard";
+        elements.difficultyText.style.color = "#ffaa44";
+    } else if (gameState.zoneWidth <= 70) {
+        elements.difficultyText.textContent = "Medium";
+        elements.difficultyText.style.color = "#ffff44";
+    } else {
+        elements.difficultyText.textContent = "Easy";
+        elements.difficultyText.style.color = "#00ff88";
+    }
 }
 
 function gameLoop() {
-    if (!gameState.running) return;
+    if (!gameState.running || gameState.isPaused) return;
 
     if (gameState.speedIncreasing) {
         gameState.speed += 0.02;
@@ -392,12 +685,27 @@ function successTap() {
     gameState.score++;
     gameState.streak++;
     
-    elements.zone.style.animation = 'none';
-    setTimeout(() => {
-        elements.zone.style.animation = 'pulse 0.3s';
-    }, 10);
+    // Visual feedback
+    elements.zone.classList.remove('success');
+    void elements.zone.offsetWidth; // Trigger reflow
+    elements.zone.classList.add('success');
     
-    gameState.zoneWidth = Math.max(25, gameState.zoneWidth - 1);
+    // Hide tutorial after first success
+    if (gameState.score === 1) {
+        elements.tutorialText.style.display = 'none';
+    }
+    
+    // Update zone size based on score
+    if (gameState.score < 10) {
+        gameState.zoneWidth = Math.max(50, gameState.zoneWidth - 0.5);
+    } else if (gameState.score < 25) {
+        gameState.zoneWidth = Math.max(35, gameState.zoneWidth - 1);
+    } else if (gameState.score < 50) {
+        gameState.zoneWidth = Math.max(25, gameState.zoneWidth - 1.5);
+    } else {
+        gameState.zoneWidth = Math.max(15, gameState.zoneWidth - 2);
+    }
+    
     const barWidth = adjustBarWidth();
     gameState.zoneStart = Math.random() * (barWidth - gameState.zoneWidth);
     
@@ -415,10 +723,9 @@ function successTap() {
 function failTap() {
     gameState.streak = 0;
     
-    elements.bar.style.animation = 'shake 0.5s';
-    setTimeout(() => {
-        elements.bar.style.animation = '';
-    }, 500);
+    elements.bar.classList.remove('shake');
+    void elements.bar.offsetWidth; // Trigger reflow
+    elements.bar.classList.add('shake');
     
     if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
     
@@ -426,7 +733,7 @@ function failTap() {
 }
 
 function handleTap() {
-    if (!gameState.running) return;
+    if (!gameState.running || gameState.isPaused) return;
     
     gameState.running = false;
     if (gameState.animationId) {
@@ -548,6 +855,7 @@ function continueGame() {
 // ====================== UI FUNCTIONS ======================
 function showGameOverModal() {
     elements.modalScore.textContent = `Score: ${gameState.score}\nBest: ${gameState.bestScore}`;
+    elements.pauseScore.textContent = gameState.score;
     
     if (gameState.canContinue) {
         elements.watchAdBtn.style.display = 'block';
@@ -566,6 +874,17 @@ function hideGameOverModal() {
     elements.gameOverModal.style.display = 'none';
 }
 
+function showPauseModal() {
+    elements.pauseScore.textContent = gameState.score;
+    elements.pauseModal.style.display = 'flex';
+    gameState.isPaused = true;
+}
+
+function hidePauseModal() {
+    elements.pauseModal.style.display = 'none';
+    gameState.isPaused = false;
+}
+
 function endGame() {
     elements.tapBtn.style.display = 'none';
     gameState.running = false;
@@ -577,7 +896,29 @@ function endGame() {
 }
 
 function showMessage(text) {
-    alert(text);
+    // Create a temporary message display
+    const messageEl = document.createElement('div');
+    messageEl.textContent = text;
+    messageEl.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0,0,0,0.8);
+        color: white;
+        padding: 15px 25px;
+        border-radius: 10px;
+        z-index: 3000;
+        font-size: 1.1em;
+        border: 2px solid #00ff88;
+        text-align: center;
+        max-width: 80%;
+    `;
+    document.body.appendChild(messageEl);
+    
+    setTimeout(() => {
+        document.body.removeChild(messageEl);
+    }, 3000);
 }
 
 function resetGame() {
@@ -589,14 +930,31 @@ function resetGame() {
     gameState.zoneStart = 100;
     gameState.canContinue = true;
     gameState.isShowingAd = false;
+    gameState.isPaused = false;
     
     elements.zone.style.left = gameState.zoneStart + 'px';
     elements.zone.style.width = gameState.zoneWidth + 'px';
     elements.tapBtn.style.display = 'block';
+    elements.tutorialText.style.display = 'block';
     
     updateUI();
     hideGameOverModal();
+    hidePauseModal();
     resetRound();
+}
+
+function startGame() {
+    elements.startScreen.style.display = 'none';
+    elements.gameContainer.style.display = 'block';
+    resetGame();
+}
+
+function goToMainMenu() {
+    hideGameOverModal();
+    hidePauseModal();
+    elements.gameContainer.style.display = 'none';
+    elements.startScreen.style.display = 'flex';
+    loadBestScore();
 }
 
 // ====================== EVENT LISTENERS ======================
@@ -615,6 +973,20 @@ elements.cancelAdBtn.addEventListener('click', function() {
     elements.cancelAdBtn.style.display = 'none';
 });
 elements.playAgainBtn.addEventListener('click', resetGame);
+elements.mainMenuBtn.addEventListener('click', goToMainMenu);
+
+elements.startGameBtn.addEventListener('click', startGame);
+elements.howToPlayBtn.addEventListener('click', function() {
+    alert("How to Play:\n\n1. Tap when the red indicator is inside the green zone\n2. Each successful tap increases your score\n3. The green zone gets smaller as you progress\n4. Miss the zone and the game ends!\n\nWatch the indicator's speed pattern - it speeds up and slows down rhythmically!");
+});
+
+elements.pauseBtn.addEventListener('click', showPauseModal);
+elements.resumeBtn.addEventListener('click', hidePauseModal);
+elements.restartBtn.addEventListener('click', function() {
+    hidePauseModal();
+    resetGame();
+});
+elements.quitBtn.addEventListener('click', goToMainMenu);
 
 elements.adBanner.addEventListener('click', function() {
     const shareText = `I scored ${gameState.score} in Last Tap Wins! My best: ${gameState.bestScore} 🎯 Can you beat me?`;
@@ -653,9 +1025,6 @@ window.addEventListener('load', function() {
             console.log('✅ Monetag loaded successfully');
         }
     }, 3000);
-    
-    // Start the game
-    setTimeout(resetRound, 500);
 });
 
 // Handle window resize
@@ -679,6 +1048,21 @@ window.addEventListener('monetag_ad_error', function(e) {
 
 window.addEventListener('monetag_ad_closed', function() {
     console.log('🔒 Monetag ad closed event received');
+});
+
+// Keyboard controls
+window.addEventListener('keydown', function(e) {
+    if (e.code === 'Space' && elements.gameContainer.style.display !== 'none') {
+        e.preventDefault();
+        handleTap();
+    }
+    if (e.code === 'Escape' && elements.gameContainer.style.display !== 'none') {
+        if (elements.pauseModal.style.display === 'flex') {
+            hidePauseModal();
+        } else if (elements.gameOverModal.style.display !== 'flex') {
+            showPauseModal();
+        }
+    }
 });
 </script>
 </body>
